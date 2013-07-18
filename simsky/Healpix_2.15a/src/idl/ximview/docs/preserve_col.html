@@ -1,0 +1,73 @@
+<HTML>
+<HEAD>
+<TITLE>Don't Panic!</TITLE>
+</HEAD>
+<BODY >
+<h2>"Preserve Colour" Option</h2>
+
+The RGB dialog gives you the option of using the algorithm of Lupton
+et al. (2004, PASP, 116, 816) to re-scale the input images to preserve
+"true" colour. With this set, the colour displayed represents the 
+<i>linear</i> ratios of the input channels, prior to any 
+<a href="transfun.html">transfer function</a>
+scaling. When this option is chosen a second dialog box prompts you to
+choose <b>rescale factors</b> for the three channels and a <b>display range</b>
+and <b>transfer function</b> for the average image. This works as follows:
+
+<p>Let <i>T<sub>i</sub></i> be the intensity in colour channel <i>i</i>, 
+<i>z<sub>i</sub></i> be the zero level
+recorded for that channel 
+(via the <a href="menu.html#ADJUST">Adjust Scaling</a> dialog), 
+<i>A<sub>i</sub></i> be its rescale factor, and <i>r<sub>1</sub></i>, 
+<i>r<sub>2</sub></i> be the minimum and maximum
+of the display range set for the average image. We calculate
+<ol>
+<li><i> T<sup>c</sup><sub>i</sub>  = A<sub>i</sub> &times; 
+(T<sub>i</sub>&minus; z<sub>i</sub>)</i><BR>
+(corrected channel image)
+
+<p><i>A<sub>i</sub></i> can compensate for different units on different 
+channels or just rescale channels to get a more interesting-looking result.
+
+<li> <i>T<sub>Av</sub> = (1 / N<sub>i</sub>)
+</i>&sum;<i><sub>i</sub></i>( <i>T<sup>c</sup><sub>i</sub></i>)<BR>
+(Average over colour channels)
+
+<li> <i>F<sub>Av</sub></i> = TransferFunction(<i>T<sub>Av</sub>, 
+r<sub>1</sub>, r<sub>2</sub></i>)<BR>
+(Transformed average image, mapping <i>r<sub>1</sub></i> to zero and 
+<i>r<sub>2</sub></i> to maximum brightness).
+
+<li> <i>F<sub>i</sub> = (T<sup>c</sup><sub>i</sub> &minus; r<sub>1</sub>) 
+&times; (F<sub>Av</sub>/ T<sub>Av</sub>)</i><BR>
+(Transformed channel image)
+</ol>
+<i>F<sub>i</sub></i> are used as the colour channels for the R-G-B image. 
+They also replace the displayed images on the original tabs (and look very
+odd). The point is that the <i>F<sub>i</sub></i> have essentially the same 
+ratio as
+<i>T<sup>c</sup><sub>i</sub></i> (exactly so, if <i>r<sub>1</sub></i> = 0), 
+despite the possibly non-linear scaling of the total intensity.  
+Even when <i>F<sub>Av</sub></i> is saturated at the maximum
+value, the <i>F<sub>i</sub></i> preserve the "true" colour. 
+
+<p>Note: the overall scale is adjusted so that the maximum 
+<i>F<sub>i</sub></i> over all channels is equal to the
+maximum colour intensity (255). This tends to give rather dim images
+compared to the alternative, the "saturate to white" option.
+
+<p>The grey levels encoding off-sky and bad pixels are also preserved
+(bad pixels in any channel make that pixel bad in all channels).
+
+<p>The original tabs can be restored via the "Adjust scaling" dialog, but
+then the RGB image will revert to the standard "saturate to white".
+
+<HR>
+<ADDRESS>
+J. P. Leahy<br>
+Jodrell Bank Centre for Astrophysics, and<br>
+Osservatorio Astronomico di Trieste<br>
+jpl@jb.man.ac.uk
+</ADDRESS>
+</BODY>
+</HTML>

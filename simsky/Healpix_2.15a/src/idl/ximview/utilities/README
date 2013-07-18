@@ -1,0 +1,17 @@
+Utilities directory
+
+The routines in this directory are used by Ximview but may be more generally
+applicable.
+
+hsv2rgb.pro         Converts Hue-Sat-Value images to Red-Green-Blue 
+                    byte-scaled images. Faster than the intrinsic 
+                    COLOR_CONVERT for large arrays, especially
+                    if the "V" value is already scaled to bytes.
+linecols.pro        Loads simple colour table suitable for line plots.
+numunit.pro         Formats (number, unit) pair for printing
+cursor_grip.pro     Sets cursor to "gripping hand"
+divup.pro           Integer divide rounding up instead of down
+get_tab_uvals.pro   Returns the uservalues for the tabs associated with a 
+                    widget base as an array.
+get_user_datum.pro  Simple dialog widget to ask for one number
+get_user_item.pro   Simple dialog widget asking user to choose item from list

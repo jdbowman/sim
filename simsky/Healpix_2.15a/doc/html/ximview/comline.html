@@ -1,0 +1,125 @@
+<HTML>
+<HEAD>
+<TITLE>Don't Panic!</TITLE>
+</HEAD>
+<BODY >
+
+<h2>Command line options for Ximview</h2>
+
+Usage:
+<pre>
+
+HIDL> ximview, Input, [Range, {Proj, /NPOLE, /SPOLE}, {Order, /RING, /NESTED}, $ 
+               COLUMN = column, EXTENSION = extension, WRAP = wrap, /ROLL, $
+               NAME = name, LOG = logfile, /TEMPORARY, /VERBOSE]
+
+</pre>
+<dl>
+<dt><tt>Input</tt></dt><dd>can be any of:
+<ul>
+<li> FITS file name (with or without <tt>'.fits'</tt> or <tt>'.FITS'</tt> 
+extension). Recognised
+formats are standard images (in the primary header and data unit (HDU)
+or stored
+as an image extension), all-sky HEALPix arrays stored in binary table 
+extensions, and "CUT4" format partial-sky HEALPix datasets stored in 
+binary tables containing a <tt>'PIXEL'</tt> column, a <tt>'SIGNAL'</tt> 
+column, and optionally other columns.
+<li>on-line HEALPix array.
+<li>on-line 2-D image. 
+<li>Structure containing header and data (e.g. as produced by the HEALPix 
+IDL routine <tt>READ_FITS_S</tt>), containing images, all-sky HEALPix, or CUT4
+HEALPix. 
+<li>IDL pointer to any of the above (also, the structure may contain
+pointers to the data columns, rather than the data arrays themselves).
+<li>Array of IDL pointers to maps or HEALPix arrays.
+</ul>
+</dd>
+
+<dt><tt>Range</tt></dt><dd>is usually <tt>[min, max]</tt> 
+but can be a single number 
+(scale from min in data to <tt>range</tt>), omitted (use the full range of 
+the data), or set to <tt>'*'</tt> or <tt>'AUTO'</tt> 
+(<a href="autoscale.html">auto-scale</a>).</dd>
+<dt><tt>Proj = {'GRID', 'NPOLE', 'SPOLE'}</tt></dt><dd>defines the projection 
+(or sort
+order) to be used if the input decodes to a HEALPix array. Default is
+<tt>'GRID'</tt>. <tt>/NPOLE</tt> and <tt>/SPOLE</tt> 
+provide shorthands for the other options,
+which are "butterfly" projections centred on the North or South Pole.</dd>
+<dt><tt>Order = {'RING', 'NESTED'}</tt></dt><dd> or <tt>/NESTED</tt> 
+can be used to specify the HEALPix
+pixel order if there is no FITS header available. The default is
+<tt>'RING'</tt>, so <tt>/RING</tt> is redundant (but present for 
+completeness).</dd>
+<dt><tt>COLUMN</tt></dt><dd> either the column number or column name for 
+HEALPix FITS files (for instance, WMAP files have column 1 = 
+<tt>'TEMPERATURE'</tt> and column 2 = <tt>'N_OBS'</tt>).  
+In CUT4 files, the first column stored is always
+<tt>'PIXEL'</tt>, but this is read by default, so 
+<tt>COLUMN = 1</tt> refers to 
+<tt>'SIGNAL'</tt>
+and so on. For image files containing a stack of images, <tt>COLUMN</tt>
+specifies the slice of the stack required. This option only works if
+the input is a file or structure; if you supply a raw data array, do
+the subsectioning first, e.g.
+<pre>
+
+      HIDL> XIMVIEW, iquv[*,0]
+
+</pre>
+not
+<pre>
+
+      HIDL> XIMVIEW, iquv, COL=0 ; this will generate an error.
+
+</pre>
+</dd>
+
+<dt><tt>EXTENSION</tt></dt><dd> the FITS extension to read. 
+If not specified the program
+looks first in the primary HDU, then in the
+first extension, then gives up.
+</dd>
+
+<dt><tt>/WRAP</tt></dt><dd> Set to give a cyclic mapping between input 
+intensity and TV
+colour: pixels within the specified intensity range are unaffected,
+but pixels outside the range map to a (multiply) cycled colour instead
+of saturating.  Set <tt>WRAP=-1</tt> to saturate for intensities below the
+specified range and wrap above it, which is usually preferable.
+</dd>
+
+<dt><tt>/ROLL</tt></dt><dd> Set to tell the program to interpret the data as 
+a HEALPix map
+in <tt>'GRID'</tt> form and hence allow panning across the 0&deg;/360&deg;
+divide. This is set automatically if the program already knows the
+format from the header, or because it converted the data into <tt>'GRID'</tt>
+format itself.</dd>
+
+<dt><tt>NAME</tt></dt><dd> a string used to title the plot; 
+if not specified, one is
+constructed from the file name and FITS header, if available.
+</dd>
+
+<dt><tt>/LOG</tt></dt><dd>Set to create a unique name for the log file 
+(<tt>ximview_1.log</tt>,
+<tt>ximview_2.log</tt>, etc), instead of the usual overwriting of
+<tt>ximview.log</tt>.  Or set <tt>LOG=</tt> a name of your choice.
+</dd>
+
+<dt><tt>/TEMPORARY</tt></dt><dd> Set to allow the program to overwrite 
+the input data array, thereby saving memory.</dd>
+
+<dt><tt>/VERBOSE</tt></dt><dd> Set to produce a lot of diagnostic and 
+timing information.
+</dl>
+<HR>
+<ADDRESS>
+J. P. Leahy<br>
+Jodrell Bank Centre for Astrophysics, and<br>
+Osservatorio Astronomico di Trieste<br>
+jpl@jb.man.ac.uk
+</ADDRESS>
+</BODY>
+</HTML>

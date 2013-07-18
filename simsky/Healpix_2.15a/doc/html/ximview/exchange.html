@@ -1,0 +1,60 @@
+<HTML>
+<HEAD>
+<TITLE>Don't Panic!</TITLE>
+</HEAD>
+<BODY >
+<h2>Data exchange with the command line</h2>
+
+If ximview is already running, as well as loading data from files, you
+can transfer data from the IDL command line by simply running Ximview
+again:
+<pre>
+
+HIDL> ximview, new_image, range</tt>
+
+</pre>
+<tt>new_image</tt> can be any of the input options available on 
+initial startup, but
+since file I/O is most conveniently done by the Load FITS menu option,
+this is most useful for on-line data. All the 
+<a href="comline.html">command line options</a> are available, 
+except for those specifying the HEALPix projection which are ignored: the
+projection always conforms to that for the images already loaded.
+
+<p>You can also extract an image from ximview via
+<pre>
+
+HIDL> my_image = ximget('Temp')
+
+</pre>
+or 
+<pre>
+
+HIDL> Q_pol = ximget(1,/NO_COPY)
+
+</pre>
+The first argument specifies the tab (numerical values start at zero
+for the leftmost tab).
+
+<p>The <tt>/NO_COPY</tt> option removes the data from Ximview (deleting 
+the tab in the process) to save memory.
+
+<p>It is therefore possible to load images into Ximview, examine them,
+extract them to the command line and perform further processing (eg
+take the difference, extract a dipole, etc), and re-display the result
+without the overheads of file I/O and conversion from pixel list to
+grid.
+
+
+<p>NB: bad and off-sky pixels are returned with value NaN.
+
+<HR>
+<ADDRESS>
+J. P. Leahy<br>
+Jodrell Bank Centre for Astrophysics, and<br>
+Osservatorio Astronomico di Trieste<br>
+jpl@jb.man.ac.uk
+</ADDRESS>
+</BODY>
+</HTML>
+

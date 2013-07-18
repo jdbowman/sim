@@ -1,0 +1,144 @@
+<HTML>
+<HEAD>
+<TITLE>Don't Panic!</TITLE>
+</HEAD>
+<BODY >
+<H1>Ximview Help</h1>
+<h3>version 0.6.2 beta</h3>
+<H2>Introduction</H2>
+
+
+Ximview is a utilty intended for quick-look inspection of HEALPix
+images (as well as ordinary 2-D images) at the level of individual
+pixels. Features include panning, zooming, blinking, image statistics
+and peak finding.
+
+<p>Its strength is intended to be in reasonably efficient handling of
+large images and display over broadband (LAN) network links, not just
+on single workstations. Ximview is not intended for production of
+printable or publishable graphics. It is very slow if run over the
+internet. Ximview has been tested under Linux, Windows, and MacOS (but 
+needs more thorough testing on all platforms).
+
+<p>The default projection for HEALPix datasets is the "HEALPix grid" 
+defined by Calabretta &
+Roukema (2007MNRAS.381..865C), which is a 5 &times; N<sub>side</sub> 
+square grid with the
+Galactic plane running top-right to bottom-left. You can also choose
+the "butterfly" projections (centered on a pole) described in the same
+paper.
+
+
+<h3><A NAME="SIMPLE_USE">Simple use</A></h3>
+
+<pre>
+
+HIDL> ximview, 'test_iqu', '*'
+
+</pre>
+If <tt>test_iqu.fits</tt> is a HEALPix map with three polarization channels, 
+each channel is loaded into a "tab" on the Ximview window. 
+You can switch channels
+either by clicking on the tab header, or by blinking between them
+automatically.
+
+You can pan and zoom over the images with continuous readout of
+position and intensity. The second argument specifies that the
+intensity range for each channel should be automatically scaled to
+something (hopefully) sensible.<p>
+
+Instead of a file name you can specify various other kinds of input,
+the simplest being on-line HEALPix arrays, 2-D images, or structures 
+containing header and data, as produced by the HEALPix IDL routine 
+<tt>READ_FITS_S</tt>.<p>
+
+Initially Ximview starts in "overview" mode, in which the entire image
+is displayed scaled to fit into the display window. By clicking
+anywhere with the left mouse button, you enter "zoom" mode, centred on
+that point in the image. Initially, the scale is set to 1 image pixel
+per display pixel (or larger if the image is so small that it all fits
+on the screen).
+
+
+<h4><a name="BASIC">Basic operations</a></h4>
+<dl>
+<dt><b>Pan</b></dt><dd>by dragging the image with mouse button 1.</dd>
+<dt><b>Mark points</b></dt><dd>by clicking mouse button 2 
+(also prints the pixel details on your xterm and in the log file). Only
+the latest marked point is remembered; earlier ones are erased from the
+display as soon as you pan or zoom.</dd>
+<dt><b>Zoom in or out</b></dt><dd>(by factors of 2) with the buttons on 
+the left-hand side. Zoom factors of less than one are handled by decimating
+the input image (e.g. at zoom 0.5 only every other row and column is
+displayed). Ximview never changes the actual pixel values, e.g. by 
+interpolating or binning.</dd>
+<dt><b>Reset the zoom</b></dt><dd>to 1 input pixel to 1 output pixel with 
+the 1:1 button.</dd>
+<dt><b>Return to overview mode</b></dt><dd> with the overview button.
+Unlike zoom mode, overview mode is not restricted to factor-of-two zooms but
+chooses an integer resampling factor to fill the display as much as possible.
+
+<p>Clicking again in the image window re-enters zoom mode, this time at the 
+last zoom you were using.</dd>
+<dt><b>Resize the window</b></dt><dd> and the view will adjust to match (within
+reason).</dd>
+</dl>
+Along the bottom of the window are buttons for the most useful tasks:
+
+<dl COMPACT>
+<dt><b>Blink on/off:</b></dt><dd>start or stop blinking through the channels. 
+This is done by copying the display on each tab in turn to a new temporary tab.
+(Simply selecting the tabs directly causes "flashing" which
+makes subtle changes harder to see). You can pan, zoom and swap tabs as normal
+while blinking is in progress, except that panning is not as smooth as usual
+since the blink tab is only updated at the blink rate (default 2 Hz).</dd>
+
+<dt><b>Imstats:</b></dt><dd>
+gets image statistics in a box surrounding the marked point,
+or a user-defined ROI ("region of interest"). The region analysed
+is briefly marked on the screen (erased when you pan or zoom).
+
+<p>The ROI option uses the IDL routine <tt>CW_DEFROI</tt> which launches its
+own dialog box. Note that this is usually part-hidden by the main Ximview 
+window when it launches.</dd>
+
+<dt><b>Peakfit:</b></dt><dd>
+finds the maximum or minimum in a small box around the marked point, and
+fits the 3 &times; 3 pixels surrounding the local maximum with a quadratic
+to get sub-pixel (but not optimal) accuracy.</dd>
+</dl>
+Detailed options are set via the <a href="menu.html">menu bar</a>.
+
+<H3><a name="TRUCOL">Note for TrueColor displays</a></h3>
+
+At IDL startup, before running Ximview or other graphics applications,
+set:
+<pre>
+
+HIDL> DEVICE, TRUE=24
+
+</pre>
+if you are using a TrueColor display. Otherwise you will get
+DirectColor mode, where the image is greyscale when the cursor is not
+in the image region, and when it is there, the rest of your screen
+will look bizarre. (However, changing colour tables will be much
+faster).
+
+<h3><a name="FONTS">Note on command-line fonts</a></h3>
+
+The output sent to the terminal by Ximview is formatted assume
+fixed-width fonts (e.g. for lining up output in columns). You get
+this by default with linux, but if you run IDL under Microsoft
+Windows, you are stuck in the "IDLDE" window, which by default uses a
+variable-width font for its "output" window. I suggest you change this
+via File -> Preferences in the IDLDE. (This also makes IDL's own error messages
+more comprehensible).
+<HR>
+<ADDRESS>
+J. P. Leahy<br>
+Jodrell Bank Centre for Astrophysics, and<br>
+Osservatorio Astronomico di Trieste<br>
+jpl@jb.man.ac.uk
+</ADDRESS>
+</BODY>
+</HTML>
