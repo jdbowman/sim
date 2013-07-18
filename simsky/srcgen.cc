@@ -49,6 +49,15 @@ void map2alm_iter3 (const Healpix_Map<double> &map, Alm<xcomplex<double> > &alm,
 
 int main (int argc, const char **argv)
 {
+  // Start: Added by Piyanat on 2013-07-18
+  // Check number of input parameters and print usage
+  if (argc < 6) {
+    // Print usage
+    std::cerr << "Usage: " << argv[0] << " <nside> <nsources> <seed> <fluxcut> <prefix>" << std::endl;
+    return 1;
+  }
+  // End
+
   // Input parameters
   int nside = atoi(argv[1]);
   double nsources = atof(argv[2]);
