@@ -20,5 +20,5 @@ the Makefile in the main directory to point to the HEALPix library.
 
 KNOWN BUGS
 ----------
-- Source clustering algorithm in srcgen is not working vert well. The program
+[] Source clustering algorithm in srcgen is not working vert well. The program
 produce an output map with recurring clustering pattern
