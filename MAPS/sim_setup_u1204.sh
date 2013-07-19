@@ -50,7 +50,7 @@ export HAVE_WCSLIB="TRUE"
 # header files and libraries for wcslib
 if [ "$HAVE_WCSLIB" = "TRUE" ] ; then
 #  echo "HAVE_WCSLIB is set to TRUE"
-  export WCS_INC=/usr//include/wcslib
+  export WCS_INC=/usr/include/wcslib
   export WCS_LIB=/usr/lib
 #else
 #  echo "HAVE_WCSLIB is set to FALSE"
