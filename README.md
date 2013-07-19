@@ -28,6 +28,8 @@ MAPS and simsky need to be complied separately. See README in each directory
 for more detail. Note that MAPS contain a c++ adaptation of the Angelica's
 Global Sky Model in MAPS/maps_makesky/gsm. This program requires database files
 larger than 100MB which cannot be store on the GitHub server. You **MUST**
-download these database files from https://www.dropbox.com/sh/ggsk91mikslwa2g/v3elY_tyox before compiling MAPS
+download these database files from
+https://www.dropbox.com/sh/ggsk91mikslwa2g/v3elY_tyox before compiling MAPS if
+you check MAPS out from this git repository.
 
 pymodule and scrips can be directly added to you PYTHONPATH.
