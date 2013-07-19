@@ -15,4 +15,6 @@ pymodule: python modules, consisting of python wrapper of MAPS tasks and tools
     to do other stuff
 
 scripts: template of python scripts that utilize pymodule and scripts to do
-    other stuff such as extrapolating the Haslam map
+    other stuff such as extrapolating the Haslam map. Some scripts are
+    executable expected in pymodule, so you should add this directory to your
+    PATH
