@@ -1,0 +1,9 @@
+        : T_srclist_here  src_lines  T_end T_srclist '\n' 
+	        { if (bgp) {
+		    if (bgp->is_set.srclist == 2) {
+		      *yytext = 0;
+		      yyerror("multiple source lists"); YYERROR;
+		    }
+		    else
+		      bgp->is_set.srclist = 2; }
+		}
