@@ -126,8 +126,8 @@ def freq_interp_fits(infits, infreq, outfreqs, outfits=None, beta=None,
      """
     inmap, inmap_header = pf.getdata(infits, header=True)
     basefreq = infreq
-    print 'Read base map from {0:s}'.format(infits)
-    print 'Frequency of inmap: {0:f} MHz'.format(infreq)
+    # print 'Read base map from {0:s}'.format(infits)
+    # print 'Frequency of inmap: {0:f} MHz'.format(infreq)
     if isinstance(outfreqs, float):
         freqs = [outfreqs]
     elif isinstance(outfreqs, (tuple, list, np.ndarray)):
@@ -172,17 +172,18 @@ def freq_interp_fits(infits, infreq, outfreqs, outfits=None, beta=None,
         inmap_header['BUNIT'] = 'Jy/sr'
     else:
         multiplier = np.ones_like(freqs)
-
-    def interp(args):
-        f, m, name = args
-        print 'Scaling base map to {0:.3f}MHz and save output to {1:s}'\
-            .format(f, name)
-        T = m * inmap * np.exp(beta * np.log(f / basefreq) + gamma * (np.log(f / basefreq)) ** 2)
-        pf.writeto(name, T, header=inmap_header, clobber=True)
-
-    args = (freqs, multiplier, outfits)
+    args = (freqs, multiplier, outfits, inmap, inmap_header, beta, gamma, basefreq)
     p = Pool(nthreads)
     p.map(interp, args)
+
+
+def interp(args):
+    f, m, name, inmap, inmap_header, beta, gamma, basefreq = args
+    print 'Scaling base map to {0:.3f}MHz and save output to {1:s}'\
+        .format(f, name)
+    T = m * inmap * np.exp(beta * np.log(f / basefreq)
+                           + gamma * (np.log(f / basefreq)) ** 2)
+    pf.writeto(name, T, header=inmap_header, clobber=True)
 
 
 def freq_interp_hpm(inmap, infreq, outfreq, spectral_index=(), curverture=()):
