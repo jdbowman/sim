@@ -1,0 +1,25 @@
+Ximview Installation Instructions
+
+To run Ximview you need:
+
+1. IDL version 6.0 or higher. IDL is a commercial package available from
+   ITT: see http://www.ittvis.com/idl/
+
+2. The HEALPix IDL library. This is available under the GNU Public License
+   as part of the HEALPix software collection, see:
+   http://healpix.jpl.nasa.gov/index.shtml.
+
+   Only the programs in the src/idl/ subdirectory of the HEALPix installation
+   are required.
+
+No compilation is necessary, you only have to ensure that the XIMVIEW 
+and HEALPix directories are included in your IDL path, ideally with XIMVIEW
+occurring first. If you have the NASA IDL Astrolib installed, make sure that
+XIMVIEW occurs before the astrolib directory in your IDL path.
+
+Position in the path is important because both XIMVIEW and HEALPix include 
+versions of astrolib routines. Since these are updated often, there may be 
+incompatibilities between the versions in your astrolib directory and the
+ones required by Ximview; also XIMVIEW includes a custom version of one 
+routine (WCSSPH2XY). 
+ 

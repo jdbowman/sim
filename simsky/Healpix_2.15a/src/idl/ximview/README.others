@@ -1,0 +1,258 @@
+OTHER ROUTINES IN THE XIMVIEW PACKAGE
+=====================================
+
+Associated with XIMVIEW are some other programs that may be useful:
+
+
+HPGRID 
+======
+
+Program to convert HEALPix maps into 2-D images without interpolation.
+
+Usage examples
+
+Simple case: returns gridded version of healpix array in nested format:
+
+HIDL> grid = HPGRID(hparray)  
+
+"hparray" can be an array of n_pix values, or a multi-dimensional array
+of dimensions [n_pix,n1,n2,...], or an array of pointers with dimensions
+[n1,n2,...] each of which points to a 1D array of length n_pix. In the
+latter two cases, the returned value "grid" is an array of pointers of 
+dimension [n1,n2,..], each pointing to 2D grids (so, e.g. I,Q,U maps can 
+be processed in one pass). 
+
+Grid pixels not mapped to sky pixels are set to NaN, which is also used
+for bad data.
+
+Other options:
+
+HIDL> grid = HPGRID(header, {order, /RING, /NESTED}, {proj, /NPOLE, /SPOLE}, $
+HIDL>               UNIT=unit, HP_INDEX=idx, /VERBOSE)
+
+header: On input: header describing the original array, or undefined variable
+	On output: update of original (if supplied) with details of the 2-D
+	grid projection (suitable for use as a primary header unit).
+
+order, /RING, /NEST:  As for ximview
+proj, /NPOLE, /SPOLE: As for ximview
+
+unit: Name of intensity unit to put in header (if not already present).
+
+HP_INDEX=idx    Returns an array the same size as "grid" containing 
+                HEALPix pixel numbers. Grid pixels not mapped to sky 
+                pixels are set to -1.
+
+/VERBOSE:       prints timing info.
+
+
+CUT4GRID
+========
+
+This is similar to HPGRID but reads files in CUT4 format. This is for
+partial-sky maps; the main difference from standard HEALPix files is that
+the first two columns in each extension have to be "PIXEL" and "SIGNAL",
+with the former listing the HEALPix pixel number.
+
+Usage:
+
+HIDL> grid = HPGRID(pixels, data, header, {order, /RING, /NESTED}, $
+HIDL>               {proj, /NPOLE, /SPOLE}, UNIT=unit, HP_INDEX=idx, /VERBOSE)
+
+"pixels" must be a 1-D array of pixels values, say length n_cut.  As
+with HPGRID, data can be either an array of dimension [n_cut, n1,
+n2...], or an array of pointers of dimension [n1, n2...], each
+pointing to a 1-D array of length n_cut. The returned gridded image is
+the smallest possible that contains all the pixels in the requested
+projection. The "GRID" projection may be "rolled" in longitude to
+avoid splitting the sky region between sections separated by nearly
+360 degrees.
+
+
+TVDISP
+======
+
+Displays an image on the TV with automatic scaling, re-binning and centring.
+
+Simple use:
+
+HIDL> LOADCT, 39 ; Or your favourite colour table
+HIDL> TVDISP, grid, 5, [-0.001, 0.01]
+
+Displays the grid, resampled every 5 pixels, scaled from -0.001 to 0.01
+intensity units, centred in the window. 
+
+The intensity range works as for XIMVIEW, and there are identical /WRAP
+and /VERBOSE options. 
+
+Instead of centering, the native IDL positional argument can be specified:
+
+HIDL> TVDISP, grid, 5, [-0.001, 0.01], 0
+
+puts the grid in the top left corner of the window (if it fits), or in 
+the bottom left of the window (if it doesn't fit). Or the corner can be 
+given explicitly:
+
+HIDL> TVDISP, grid, 2, [-0.001, 0.01], [10,10]
+
+puts the bottom left corner of the grid at TV pixel (10,10)
+
+A last feature is that the resample parameter can be a vector: 
+
+HIDL> TVDISP, grid, [3,2] ; resamples every 3 in x and 2 in y.
+
+			
+IMSTATS and MAXFIT
+=======     ======
+
+Called on demand by XIMVIEW, these utilities can also be called 
+independently. They mimic the AIPS routines of the same names. 
+
+HIDL> boxsize = 33
+HIDL> box = IMSTATS(grid, xpix, ypix, boxsize)
+
+Prints the positions & fluxes of the max & min pixels, and the mean,
+median, and standard deviation, in a 33 x 33 pixel square surrounding
+xpix, ypix.  Blanks (NaNs) are ignored. Statistics are also calculated
+ignoring exactly zero pixels. The integrated flux density is printed
+if there is enough astrometric information to derive a pixel size.
+
+boxsize can give a width and height, e.g. [101, 51], for a rectangular
+box.
+
+IMSTATS returns an array containing the pixel coordinates of the box
+corners as actually used (the box is trimmed if the given position is
+too close to the edge of the image).
+
+IMSTATS also accepts a list of pixel coordinates as input, defining
+a ROI (region of interest). For instance using the standard IDL routines
+TVSCL and DEFROI:
+
+HIDL> TVSCL, image                      ; Display image by nx by ny pixels
+HIDL> region = DEFROI(nx, ny)           ; Interactively define ROI
+
+HIDL> xpix = region MOD nx              ; converts 1D indices to 
+HIDL> ypix - region / nx                ; x- and y- pixel coords.
+
+HIDL> null = IMSTATS(image, xpix, ypix) ; including boxsize gives an error now
+
+Keyword options: ASTROM = a structure defining the astrometry
+parameters, as used in the IDL Astrolib WCS astrometry routines. If
+supplied, sky positions are calculated, and also HEALPix pixel numbers
+for both RING and NEST order if the projection type is HEALPix
+grid. (At present the butterfly projections are not recognised by the
+astrometry package.)
+
+UNIT = a string for the flux unit.
+
+LUN = logical unit number of a file already opened for writing, which
+receives a copy of the text printed on the terminal.
+
+
+HIDL> boxin = 5
+HIDL> coords = MAXFIT(grid, xpix, ypix, boxin)
+
+Finds and prints the maximum pixel in the 5 x 5 box surrounding xpix,
+ypix, and then fits a 2nd-order polynomial in x and y to the 3 x 3
+pixel region surrounding the peak. Prints the fitted peak flux and its
+position, and returns the position in pixel coordinates. Unlike
+IMSTATS, maxfit always uses a square search box.
+
+The keyword options ASTROM, UNIT and LUN are available as for IMSTATS.
+
+Again blanks are ignored, and if astrom is supplied the true sky
+positions are used for both fitting and reporting. MAXFIT returns the
+real-number fitted coordinates in pixel units. Again it prints the
+HEALPix pixel numbers for the peak.
+
+IF /EXTREMUM is set, MAXFIT fits the absolute maximum (positive or
+negative) peak in the search area. (When called by XIMVIEW, /EXTREMUM
+the initial default).
+
+
+
+Lower-level routines:
+
+PARSE_INPUT
+==========
+
+This interprets the input parameter for XIMVIEW, but is also useful
+for reading files and converting to grids in one step. On the command
+line:
+
+HIDL> parse_input, filename, data, header, name, PROJ=proj
+
+If the file contains HEALPix data, data contains the gridded map and
+header the header (updated with the appropriate WCS data for the
+grid). "name" is the suggested title string.
+
+Other parameters and options are mainly intended for use within
+programs; see the code header for full documentation.
+
+
+GRID2HP_INDEX
+=============
+
+Routine to convert pixel coordinates from 2-D grids to standard
+HEALPix indices:
+
+HIDL> GRID2HP_INDEX, nside, x, y, {proj, /NPOLE, /SPOLE}, $ HIDL>
+{order, /RING, /NESTED, /BOTH}, R_OFF = scratch
+
+nside; the usual HEALPix parameter.  
+x, y:  pixel coordinates on the grid
+
+proj, /NPOLE, /SPOLE, work as for XIMVIEW and HPGRID
+
+order, /RING, /NESTED, /BOTH are similar to the XIMVIEW versions, but if
+order = 'BOTH', /BOTH is specified, or both /RING and /NESTED are specified,
+the output is a 2-D array [[ring pixels], [nested pixels]].
+
+R_OFF = scratch array used for starting offsets for each ring.  Not
+required, but can be set to an undefined variable to improve execution
+speed if GRID2HP_INDEX is to be called many times with /RING set. The
+actual values are filled in on the first call.
+
+
+NUMUNIT
+=======
+
+Formats number-unit pairs nicely, eg:
+
+IDL> PRINT, NUMUNIT(1.7377e7,'JY/PIXEL', DEC=2)
+  17.38 MJy/pixel
+
+The output is folded into [0,1000[ but setting an appropriate
+multiplier prefix if such prefixes are allowed for the first element
+of the unit string (e.g. "Jy" in this case. Otherwise the unit is not
+changed and the number is formatted with the "E" code, i.e. 1.738E7 in
+this case.
+
+Options:
+PRECISION = number of significant figures
+DECIMALS  = number of decimal places (gives fixed-format output).
+/FORCE      If set, re-scale even unrecognised or unscalable units by 
+            including "10^n" in the unit, e.g.
+
+
+IDL> PRINT, NUMUNIT(1.234e10,'foobar',PREC=4)
+  1.234E+10 foobar
+
+but:
+IDL> PRINT, NUMUNIT(1.234e10,'foobar',PREC=4, /FORCE)
+  12.34 10^9 foobar
+
+
+MULTIPLIER = the conversion from input to output
+OUT_UNIT =   the unit string
+
+(These may be useful for formatting tabular data etc).
+
+
+
+EXTERNAL ROUTINES
+=================
+
+This distribution also contains all IDL Astrolib routines used that
+are not already included in the HEALPix distribution: see
+astrolib/README for details.

@@ -1,0 +1,26 @@
+This directory contains the subroutines of the GSCROLL package, which
+handles the low-level I/O to the TV including panning and zooming.
+
+Most of these routines access the GRID_GSCROLL common block.
+
+Contents
+
+Mid-level: Called directly from high-level routines:
+
+gscroll.pro           Main gscroll routine
+gscroll_setup.pro     Initializes GRID_GSCROLL common and creates pixmaps.
+gscroll_tidy.pro      Marks common as closed and deletes pixmaps
+gscroll_addscreen.pro Updates common for a new screen and creates a pixmap 
+                      for it.
+gscroll_newscreen.pro Changes from one screen to a new one. Also deletes
+                      pixmaps if the former screen has been deleted.
+gscroll_refresh.pro   Refreshes the current screen without panning or zooming.
+gscroll_setpar.pro    Sets some parameters in GRID_GSCROLL.
+gscroll_roi.pro       Supposed to draw a region-of-interest overlay over the
+                      current view (not fully debugged)
+                 
+Low-level: only called by above routines:
+
+gscroll_find_panel.pro
+gscroll_load.pro
+cellindex.pro

@@ -1,0 +1,54 @@
+<HTML>
+<HEAD>
+<TITLE>Don't Panic!</TITLE>
+</HEAD>
+<BODY >
+<h2>Transfer functions</h2>
+
+
+The original image data is converted to displayed colour is a
+two-stage process. First the image data scaled into the range [0, 255]
+via a "transfer function", then these values are interpreted as
+colours via the colour table.
+
+<p>The current transfer functions are:
+<dl>
+<dt><b>Linear</b></dt><dd> Output proportional to <i>(intensity &minus; 
+range minimum)</i>.
+
+</dd><dt><b>Sqrt</b></dt><dd>   Output proportional to 
+&radic;(<i>intensity &minus; range minimum</i>) 
+&nbsp;(or zero if argument is negative).
+
+</dd><dt><b>Asinh</b></dt><dd>  Output proportional to
+<blockquote>
+Asinh<i>((intensity &minus; zero) / &beta;)</i> 
+&minus; <i>Asinh((range min &minus; zero) / &beta;)</i>.
+</blockquote>
+<i>Zero</i> and <i>&beta;</i> can be set via the 
+<a href="menu.html#ADJUST">Adjust Scaling</a> dialog on the 
+<a href="menu.html#DISPLAY">display menu</a>, 
+or by <a href="autoscale.html">auto-scaling</a>.  
+This gives linear scaling for 
+<i>|intensity| &lt;&lt; &beta;</i>, and logarithmic for 
+<i>|intensity| &gt;&gt; &beta;</i>. 
+          Choosing &beta; a few times the noise gives good results. The 
+          default &beta; is 1 unit, which probably won't work.
+
+</dd><dt><b>Hist Eq</b></dt><dd>(Histogram equalization). 
+Output is an irregular mapping of the 
+          intensities between range min and range max, chosen to give equal 
+          number of pixels per increment of the output scale.
+</dd></dl>
+
+Asinh scaling is strongly recommended for high dynamic-range images.
+<HR>
+<ADDRESS>
+J. P. Leahy<br>
+Jodrell Bank Centre for Astrophysics, and<br>
+Osservatorio Astronomico di Trieste<br>
+jpl@jb.man.ac.uk
+</ADDRESS>
+</BODY>
+</HTML>
+

@@ -1,0 +1,11 @@
+Ximview Version 0.6.2
+
+Written by J. P. Leahy 2007-2008
+
+Please send bug reports and other requests for changes to:
+
+J. P. Leahy
+Jodrell Bank Centre for Astrophysics and
+Osservatorio Astronomico di Trieste
+
+jpl@jb.man.ac.uk
