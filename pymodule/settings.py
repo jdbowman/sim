@@ -14,8 +14,7 @@ VLA_LON = 34.025778
 VLA_EL = 2125.3704
 
 # MAPS config
-HOME = os.environ['HOME']
-MAPS_DIR = HOME + '/local/src/MAPS'
+MAPS_DIR = os.environ['SIM']
 ARRAY_DIR = MAPS_DIR + '/array'
 ARRAY_CONFIG = {'MWA_128': ARRAY_DIR + '/mwa_128_crossdipole_gp_20110225.txt',
                 'VLA_D': ARRAY_DIR + '/VLA_D.txt'}
