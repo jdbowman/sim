@@ -1,0 +1,12 @@
+MAPS_im2uv -i project2.fits -o project2_Visibility.dat -n 0.0304617 
+visgen -n project2 -s MWA_ED -A $SIM/array/ska1964_star_clumps.txt -G project2_Visibility.dat -V obs_spec_test01_gha_classic -N -m 0
+maps2uvfits project2.vis project2.uvfits -26.4311 117.357 400.0 $SIM/array/mwa_32.txt
+rm -rf project2.uv project2.map project2.beam project2.clean project2.restor
+rm -rf project2.uv project2.map project2.beam project2.clean project2.restor
+fits in='project2.uvfits' out='project2.uv' op='uvin'
+invert vis=project2.uv beam=project2.beam map=project2.map imsize=1024,1024
+clean map=project2.map beam=project2.beam out=project2.clean niters=10000
+restor model=project2.clean beam=project2.beam map=project2.map out=project2.restor
+fits op='xyout' in='project2.restor' out='proj2res.fits'
+
+

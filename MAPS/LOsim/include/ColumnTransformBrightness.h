@@ -1,0 +1,1 @@
+void ColumnTransformBrightness(char inputBrFFTfilename[]);
