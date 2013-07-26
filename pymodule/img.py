@@ -2,8 +2,8 @@ import numpy as np
 import healpy as hp
 import pyfits as pf
 import shutil
+import multiprocessing
 from subprocess import call
-from multiprocessing import Pool
 
 
 class Error(Exception):
@@ -102,7 +102,7 @@ def extrapolate_hpm(hpm_in_name, hpm_out_name, nside_out, fitrange,
 
 
 def freq_interp_fits(infits, infreq, outfreqs, outfits=None, beta=None,
-                     gamma=None, T2Jy=True, nthreads=1):
+                     gamma=None, T2Jy=True):
     """
     Interpolate a FITS image to other frequencies usig a spectral index map
     (beta) and a spectral index curverture map (gamma)
@@ -172,18 +172,10 @@ def freq_interp_fits(infits, infreq, outfreqs, outfits=None, beta=None,
         inmap_header['BUNIT'] = 'Jy/sr'
     else:
         multiplier = np.ones_like(freqs)
-    args = (freqs, multiplier, outfits, inmap, inmap_header, beta, gamma, basefreq)
-    p = Pool(nthreads)
-    p.map(interp, args)
-
-
-def interp(args):
-    f, m, name, inmap, inmap_header, beta, gamma, basefreq = args
-    print 'Scaling base map to {0:.3f}MHz and save output to {1:s}'\
-        .format(f, name)
-    T = m * inmap * np.exp(beta * np.log(f / basefreq)
-                           + gamma * (np.log(f / basefreq)) ** 2)
-    pf.writeto(name, T, header=inmap_header, clobber=True)
+    for f, m, name in zip(freqs, multiplier, outfits):
+        print 'Scaling base map to {0:.3f}MHz and save output to {1:s}'.format(f, name)
+        T = m * inmap * np.exp(beta * np.log(f / basefreq) + gamma * (np.log(f / basefreq)) ** 2)
+        pf.writeto(name, T, header=inmap_header, clobber=True)
 
 
 def freq_interp_hpm(inmap, infreq, outfreq, spectral_index=(), curverture=()):
@@ -273,7 +265,7 @@ def extract_hpm(infile, outfile, ra, dec, size=(114.6156, 114.6156),
     if not len(ra) == len(dec) == len(outfile):
         raise InputError("length of outfile, ra and dec are not equal")
     args = [[infile, o, r, d, size, res, isys] for o, r, d in zip(outfile, ra, dec)]
-    p = Pool(nthreads)
+    p = multiprocessing.Pool(nthreads)
     p.map(hpm_extract_facet, args)
 
 
