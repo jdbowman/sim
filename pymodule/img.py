@@ -142,7 +142,7 @@ def freq_interp_fits(infits, infreq, outfreqs, outfits=None, beta=None,
         freqs = outfreqs
     else:
         raise Exception("Check outfreqs format")
-    logging.info('Output frequencie(s): ', (freqs))
+    logging.info('Output frequencie(s): %s', (freqs))
     if isinstance(beta, (int, float)):
         beta = np.ones(inmap.shape) * beta
     elif isinstance(beta, str):
