@@ -4,28 +4,59 @@ import pywcs as wcs
 import scipy.interpolate as interp
 
 
-def ReadSim(simfile, cube=False):
-    """Read sky coordinate (RA, Dec), frequencies and temperature from 21 cm
+def read_sim_ascii(simfile, sep=',', shape=(), cols=None):
+    """
+    Read sky coordinate (RA, Dec), frequencies and temperature from 21 cm
     simulation cube.
 
     Parameters
     ----------
-    simfile: str
-        A simulation cube file
-    cube: boolean, optional
-        If true, outputs will be in cube (x, y, freq) formats.
+    simfile: string
+        A simulation file in ascii table format
+    delimiter: string, optional
+        Delimiter in the table. [default = ',']
+    shape: tuple of intiger, optional
+        Shape of the simulation cube. You can assign any valid numpy ndarray
+        shape to reshape the read out from the simulation file, else the output
+        is a straight array read out from the input file. Note that the program
+        only supports the same shape for RA, Dec, frequencies and temperature.
+    cols: tuple of integer or None, option
+        Columns number to read out RA, Dec, frequencies and temperature
+        from the input file.
+        e.g. (3,0,1,2) for table formatted to temperature, RA, Dec, frequencies
+        None assume sequencial order
 
     Returns
     -------
     out: ndarray
-        RA, Dec, frequencies and temperatures read from the simulation cube
+        RA, Dec, frequencies and temperatures read from the input file
+
     """
-    ra, dec, freq, temp = np.genfromtxt(simfile, unpack=True)
-    if cube:
-        return ra.reshape((128, 128, 128)), dec.reshape((128, 128, 128)), \
-        freq.reshape((128, 128, 128)), temp.reshape((128, 128, 128))
-    else:
-        return ra, dec, freq, temp
+    ra, dec, freq, temp = np.genfromtxt(simfile, delimiter=sep, usecols=cols,
+                                        unpack=True)
+    ra.shape, dec.shape, freq.shape, temp.shape = shape, shape, shape, shape
+    return ra, dec, freq, temp
+
+
+def read_sim_bin(simfile, dtype=float):
+    """
+    Read 21 cm simulation cube from a binary file
+
+    Parameters
+    ----------
+    simfile: string
+        A simulation file in ascii table format. Assume "C" order
+    dtype: numpy or python type
+        type of input binary file
+
+    Returns
+    -------
+    out: ndarray
+        the datacube
+
+    """
+    cube = np.fromfile(simfile, dtype=dtype)
+    return cube
 
 
 def ReadMap(mapfile):
