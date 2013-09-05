@@ -91,7 +91,7 @@ if __name__ == '__main__':
     inparams = parser.add_argument_group('Input File Options')
     inparams.add_argument('simfile', type=str,
         help='Path and name of the file containing 21cm brightness temperature simulation cube')
-    inparams.add_argument('--simfile_type', type=str, choices=['ascii, npy'], default='npy',
+    inparams.add_argument('--simfile_type', type=str, choices=['ascii', 'npy'], default='npy',
         help='Type of the simulation file. Can be either an ascii table or a numpy binary file (npy).'
              'If ascii, one column must be brightness temperature sorted in z, y and then x.'
              'npy file should contains numpy record array with one field as brightness temperature.')
