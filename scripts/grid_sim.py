@@ -71,7 +71,10 @@ def grid_sim(simfile, fitsfile, freq, nside=4096, simfile_type='npy',
     # Get the vector coordinates (x, y, z) of the HEALPIX pixels
     npix = hp.nside2npix(nside)
     pix = np.arange(npix)
-    x, y, z = hp.pix2vec(nside, pix) * dc
+    x, y, z = hp.pix2vec(nside, pix)
+    x *= dc
+    y *= dc
+    z *= dc
 
     # Determine the indexes (xi, yi, zi) of tiled simulation cube corresponding
     # to the vector coordinates (x, y, z) of the HEALPix pixels
