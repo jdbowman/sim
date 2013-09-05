@@ -101,8 +101,8 @@ if __name__ == '__main__':
         help='Delimiter of the ascii table')
     inparams.add_argument('--col', type=int, default=3, metavar='column_number',
         help='Column of the brightness temperature in the ascii file (zero base)')
-    inparams.add_argument('--sim_size', type=tuple, default=(128, 128, 128),
-        metavar="(sim_xsize, sim_ysize, sim_zsize)",
+    inparams.add_argument('--sim_size', type=int, nargs=3, action='append', default='128 128 128',
+        metavar=('sim_xsize', 'sim_ysize', 'sim_zsize'),
         help='Size of the simulation cube')
     inparams.add_argument('--sim_res', type=float, default=7.8125, metavar='resolution',
         help='Resolution of the simulation cube in Mpc/h')
