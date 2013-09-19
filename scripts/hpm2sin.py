@@ -12,7 +12,7 @@ from astropy.io import fits
 
 
 def hpm2sin_base(args):
-    hpm_map, fitsfile, ra, dec, dim, res = args
+    hpm_map, fitsfile, ra, dec, dim, res, multiply, add = args
 
     # Create a new WCS object. The number of axes must be set from the start
     w = wcs.WCS(naxis=2)
@@ -37,7 +37,7 @@ def hpm2sin_base(args):
 
     # Get the pixel value from the HEALPix image
     proj_map = np.zeros((dim, dim))
-    proj_map[valid_pix] = hp.get_interp_val(hpm_map, dec[valid_pix], ra[valid_pix])
+    proj_map[valid_pix] = multiply * hp.get_interp_val(hpm_map, dec[valid_pix], ra[valid_pix]) + add
 
     # header is an astropy.io.fits.Header object.  We can use it to create a new
     # PrimaryHDU and write it to a file. data is the image array. Axes in 2D numpy
@@ -48,7 +48,7 @@ def hpm2sin_base(args):
 
 
 def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
-            nthreads=1):
+            multiply=1, add=0, nthreads=1):
     """
     Extract a HEALPix image to half-sky SIN (orthographic) projected FITS images.
     The HEALPix image is assumed to be in eliptical coordinate system.
@@ -75,9 +75,9 @@ def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
     if (isinstance(fitsfile, (np.ndarray, list, tuple)) and
        isinstance(ra, (np.ndarray, list, tuple)) and
        isinstance(dec, (np.ndarray, list, tuple))):
-       args = [(hpm_map, f, r, d, dim, res) for f in fitsfile for r in ra for d in dec]
+       args = [(hpm_map, f, r, d, dim, res, multiply, add) for f in fitsfile for r in ra for d in dec]
     else:
-        args = [(hpm_map, fitsfile, ra, dec, dim, res)]
+        args = [(hpm_map, fitsfile, ra, dec, dim, res, multiply, add)]
     pool = multiprocessing.Pool(nthreads)
     pool.map(hpm2sin_base, args)
 
@@ -97,9 +97,12 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--res', '--resolution', type=float,
                         default=0.015322941176470588, metavar='RESOLUTION',
                         help='angular size of the center pixel in the SIN projected image')
-    # parser.add_argument('-s', '--scale', type=float, nargs=2, default='1 0'.split(),
-                        # metavar=('MULTIPLICATIVE', 'ADDITIVE'),
-                        # help='scaling factors to be applied to the fits image, e.g. "-s 3.2 -0.5" will multipliy 3.2 and subtract 0.5 to all pixels in the fits image')
+    parser.add_argument('-m', '--multiply', type=float, default=1,
+                        metavar='MULTIPLICATIVE',
+                        help='multiplicative factor to the fits image, ie val_pix *= m')
+    parser.add_argument('-a', '--add', type=float, default=0,
+                        metavar='ADDITIVE',
+                        help='additive factor to apply to the fits image, ie val_pix += a')
     args = parser.parse_args()
     hpm2sin(args.hpmfile, args.fitsfile, args.ra, args.dec, dim=args.dim,
-            res=args.res)
+            res=args.res, multiply=args.multiply, add=args.add)
