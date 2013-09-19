@@ -76,9 +76,9 @@ def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
     if (isinstance(fitsfile, (np.ndarray, list, tuple)) and
        isinstance(ra, (np.ndarray, list, tuple)) and
        isinstance(dec, (np.ndarray, list, tuple))):
-       args = np.array([(hpm_map, f, r, d, dim, res, scale) for f in fitsfile for r in ra for d in dec])
+       args = [(hpm_map, f, r, d, dim, res, scale) for f in fitsfile for r in ra for d in dec]
     else:
-        args = np.array([(hpm_map, fitsfile, ra, dec, dim, res, scale)])
+        args = [(hpm_map, fitsfile, ra, dec, dim, res, scale)]
     pool.map(hpm2sin_base, args)
 
 
