@@ -88,9 +88,9 @@ if __name__ == '__main__':
                         help='HEALPix image file')
     parser.add_argument('fitsfile', type=str,
                         help='output FITS file')
-    parser.add_argument('ra', type=float,
+    parser.add_argument('ra', type=float, nargs='?', default=0,
                         help='right ascension at the center of the fits image. range=[0,360]deg')
-    parser.add_argument('dec', type=float,
+    parser.add_argument('dec', type=float, nargs='?', default=0,
                         help='declination at the center of the fits image. range=[90,-90]deg')
     parser.add_argument('-d', '--dim', '--dimension', type=int, default=7480, metavar='NPIX',
                         help='dimension of the fits image in pixels. only support square images.')
@@ -103,6 +103,12 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--add', type=float, default=0,
                         metavar='ADDITIVE',
                         help='additive factor to apply to the fits image, ie val_pix += a')
+    parser.add_argument('-l', '--list', action='store_true', metavar='TXTFILE',
+                        help='threat fitsfile argument as a text file containing with three columns of (filename, ra, dec). Mainly use for multithreading')
+    parser.add_argument('--nthreads', type=int, default=1, metavar='NTHREAD',
+                        help='number of processing threads to use')
     args = parser.parse_args()
+    if args.list:
+        args.fitsfile, args.ra, args.dec = np.genfromtxt(args.fitsfile, unpack=True)
     hpm2sin(args.hpmfile, args.fitsfile, args.ra, args.dec, dim=args.dim,
-            res=args.res, multiply=args.multiply, add=args.add)
+            res=args.res, multiply=args.multiply, add=args.add, nthreads=args.nthreads)
