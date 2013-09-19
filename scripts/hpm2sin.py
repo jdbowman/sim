@@ -73,7 +73,12 @@ def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
     """
     hpm_map = hp.read_map(hpmfile)
     pool = multiprocessing.Pool(nthreads)
-    args = [(hpm_map, f, r, d, dim, res, scale) for f in fitsfile for r in ra for d in dec]
+    if (isinstance(fitsfile, (np.ndarray, list, tuple)) and
+       isinstance(ra, (np.ndarray, list, tuple)) and
+       isinstance(dec, (np.ndarray, list, tuple))):
+       args = [(hpm_map, f, r, d, dim, res, scale) for f in fitsfile for r in ra for d in dec]
+    else:
+        args = (hpm_map, fitsfile, ra, dec, dim, res, scale)
     pool.map(hpm2sin_base, args)
 
 
@@ -92,7 +97,7 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--res', '--resolution', type=float,
                         default=0.015322941176470588, metavar='RESOLUTION',
                         help='angular size of the center pixel in the SIN projected image')
-    parser.add_argument('-s', '--scale', type=float, nargs=2, default='1 0',
+    parser.add_argument('-s', '--scale', type=float, nargs=2, default='1 0'.split(),
                         metavar=('MULTIPLICATIVE', 'ADDITIVE'),
                         help='scaling factors to be applied to the fits image, e.g. "-s 3.2 -0.5" will multipliy 3.2 and subtract 0.5 to all pixels in the fits image')
     args = parser.parse_args()
