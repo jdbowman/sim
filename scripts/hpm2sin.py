@@ -12,8 +12,9 @@ from astropy.io import fits
 
 
 def hpm2sin_base(args):
-    hpm_map, fitsfile, ra, dec, dim, res, scale = args
+    hpmfile, fitsfile, ra, dec, dim, res, scale = args
 
+    hpm_map = hp.read_map(hpmfile)
     # Create a new WCS object. The number of axes must be set from the start
     w = wcs.WCS(naxis=2)
 
@@ -71,14 +72,13 @@ def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
         pairs of two numbers, multiplicative and additive, to apply to the fits image
 
     """
-    hpm_map = hp.read_map(hpmfile)
     pool = multiprocessing.Pool(nthreads)
     if (isinstance(fitsfile, (np.ndarray, list, tuple)) and
        isinstance(ra, (np.ndarray, list, tuple)) and
        isinstance(dec, (np.ndarray, list, tuple))):
-       args = [(hpm_map, f, r, d, dim, res, scale) for f in fitsfile for r in ra for d in dec]
+       args = [(hpmfile, f, r, d, dim, res, scale) for f in fitsfile for r in ra for d in dec]
     else:
-        args = [(hpm_map, fitsfile, ra, dec, dim, res, scale)]
+        args = [(hpmfile, fitsfile, ra, dec, dim, res, scale)]
     pool.map(hpm2sin_base, args)
 
 
