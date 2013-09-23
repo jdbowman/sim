@@ -13,6 +13,7 @@ from astropy.io import fits
 
 def hpm2sin_base(args):
     hpm_map, fitsfile, ra, dec, dim, res, multiply, add = args
+    print 'extracting' + fitsfile
 
     # Create a new WCS object. The number of axes must be set from the start
     w = wcs.WCS(naxis=2)
@@ -75,7 +76,7 @@ def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
     if (isinstance(fitsfile, (np.ndarray, list, tuple)) and
        isinstance(ra, (np.ndarray, list, tuple)) and
        isinstance(dec, (np.ndarray, list, tuple))):
-       args = [(hpm_map, f, r, d, dim, res, multiply, add) for f in fitsfile for r in ra for d in dec]
+        args = [(hpm_map, f, r, d, dim, res, multiply, add) for f, r, d in zip(fitsfile, ra, dec)]
     else:
         args = [(hpm_map, fitsfile, ra, dec, dim, res, multiply, add)]
     pool = multiprocessing.Pool(nthreads)
@@ -104,7 +105,7 @@ if __name__ == '__main__':
                         metavar='ADDITIVE',
                         help='additive factor to apply to the fits image, ie val_pix += a')
     parser.add_argument('-l', '--list', action='store_true', metavar='TXTFILE',
-                        help='threat fitsfile argument as a text file containing with three columns of (filename, ra, dec). Mainly use for multithreading')
+                        help='threat fitsfile argument as a comma-delimited file containing with three columns of (filename, ra, dec). Mainly use for multithreading')
     parser.add_argument('--nthreads', type=int, default=1, metavar='NTHREAD',
                         help='number of processing threads to use')
     args = parser.parse_args()
