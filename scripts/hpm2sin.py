@@ -8,18 +8,17 @@ import numpy as np
 import healpy as hp
 from astropy import wcs
 from astropy.io import fits
-# from multiprocessing.pool import ThreadPool
 from multiprocessing import Pool
-from multiprocessing import sharedctypes
 import time
+
+class hpm:
+    map=None
+
 
 def hpm2sin_base(args):
     print 'Start subprocess'
     start_time = time.time()
-    hpm_map_ctypes, shape, fitsfile, ra, dec, dim, res, multiply = args
-    hpm_map = np.ctypeslib.as_array(hpm_map_ctypes)
-    hpm_map.shape = shape
-
+    fitsfile, ra, dec, dim, res, multiply = args
     print 'extracting' + fitsfile
 
     # Create a new WCS object. The number of axes must be set from the start
@@ -45,7 +44,7 @@ def hpm2sin_base(args):
 
     # Get the pixel value from the HEALPix image
     proj_map = np.zeros((dim, dim))
-    proj_map[valid_pix] = multiply * hp.get_interp_val(hpm_map, dec[valid_pix], ra[valid_pix])
+    proj_map[valid_pix] = multiply * hp.get_interp_val(hpm.map, dec[valid_pix], ra[valid_pix])
 
     # header is an astropy.io.fits.Header object.  We can use it to create a new
     # PrimaryHDU and write it to a file. data is the image array. Axes in 2D numpy
@@ -82,27 +81,19 @@ def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
 
     """
     start_time = time.time()
-    hpm_map = hp.read_map(hpmfile)
-    size = hpm_map.size
-    shape = hpm_map.shape
-    hpm_map.shape = size
-    hpm_map_ctypes = sharedctypes.RawArray('d', hpm_map)
-    hpm_map = np.frombuffer(hpm_map_ctypes, dtype=np.float64, count=size)
-    hpm_map.shape = shape
+    hpm.map = hp.read_map(hpmfile)
     print 'Finish reading file at {:.6f} seconds'.format(time.time() - start_time)
     if (isinstance(fitsfile, (np.ndarray, list, tuple)) and
        isinstance(ra, (np.ndarray, list, tuple)) and
        isinstance(dec, (np.ndarray, list, tuple)) and
        isinstance(multiplier, (np.ndarray, list, tuple))):
-        args = [(hpm_map_ctypes, shape, f, r, d, dim, res, m)
+        args = [(f, r, d, dim, res, m)
                 for f, r, d, m in zip(fitsfile, ra, dec, multiplier)]
     else:
-        args = [(hpm_map_ctypes, shape, fitsfile, ra, dec, dim, res, multiplier)]
-    # tpool = ThreadPool(nthreads)
-    p = Pool(nthreads)
+        args = [(fitsfile, ra, dec, dim, res, multiplier)]
+    workers = Pool(nthreads)
     print 'Start passing arguments to workers at {:.6f} seconds'.format(time.time() - start_time)
-    # tpool.map(hpm2sin_base, args)
-    p.map(hpm2sin_base, args)
+    workers.map(hpm2sin_base, args)
 
 
 if __name__ == '__main__':
