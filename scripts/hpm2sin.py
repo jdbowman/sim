@@ -9,7 +9,7 @@ import healpy as hp
 from astropy import wcs
 from astropy.io import fits
 # from multiprocessing.pool import ThreadPool
-from multiprocessing import pool
+from multiprocessing import Pool
 from multiprocessing import sharedctypes
 import time
 
@@ -99,7 +99,7 @@ def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
     else:
         args = [(hpm_map_ctypes, shape, fitsfile, ra, dec, dim, res, multiplier)]
     # tpool = ThreadPool(nthreads)
-    p = pool(nthreads)
+    p = Pool(nthreads)
     print 'Start passing arguments to workers at {:.6f} seconds'.format(time.time() - start_time)
     # tpool.map(hpm2sin_base, args)
     p.map(hpm2sin_base, args)
