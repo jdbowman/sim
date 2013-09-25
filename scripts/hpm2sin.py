@@ -111,8 +111,8 @@ def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
        isinstance(ra, (np.ndarray, list, tuple)) and
        isinstance(dec, (np.ndarray, list, tuple)) and
        isinstance(multiplier, (np.ndarray, list, tuple))):
-        args = [(f, r, d, dim, res, m)
-                for f, r, d, m in zip(fitsfile, ra, dec, multiplier, hdr)]
+        args = [(f, r, d, dim, res, m, hdr)
+                for f, r, d, m in zip(fitsfile, ra, dec, multiplier)]
     else:
         args = [(fitsfile, ra, dec, dim, res, multiplier, hdr)]
     workers = Pool(nthreads)
