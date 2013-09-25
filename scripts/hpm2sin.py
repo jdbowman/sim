@@ -39,8 +39,12 @@ def _hpm2sin_base(args):
     w.wcs.crval = [ra, dec]
     w.wcs.ctype = ["RA---SIN", "DEC--SIN"]
 
-    # Now, write out the WCS object as a FITS header
+    # Now, write out the WCS object as a FITS header, adding additional
+    # fits keyword as applied
     header = w.to_header()
+    if hdr is not None:
+        for key, value in hdr.iteritems():
+            header[key] = value
 
     # Some pixel coordinates of interest.
     x, y = np.mgrid[0:dim, 0:dim]
@@ -108,9 +112,9 @@ def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
        isinstance(dec, (np.ndarray, list, tuple)) and
        isinstance(multiplier, (np.ndarray, list, tuple))):
         args = [(f, r, d, dim, res, m)
-                for f, r, d, m in zip(fitsfile, ra, dec, multiplier)]
+                for f, r, d, m in zip(fitsfile, ra, dec, multiplier, hdr)]
     else:
-        args = [(fitsfile, ra, dec, dim, res, multiplier)]
+        args = [(fitsfile, ra, dec, dim, res, multiplier, hdr)]
     workers = Pool(nthreads)
     workers.map(_hpm2sin_base, args)
 
