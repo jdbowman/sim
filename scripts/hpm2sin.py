@@ -8,13 +8,18 @@ import numpy as np
 import healpy as hp
 from astropy import wcs
 from astropy.io import fits
-from multiprocessing.pool import ThreadPool
+# from multiprocessing.pool import ThreadPool
+from multiprocessing import pool
+from multiprocessing import sharedctypes
 import time
 
 def hpm2sin_base(args):
     print 'Start subprocess'
     start_time = time.time()
-    hpm_map, fitsfile, ra, dec, dim, res, multiply = args
+    hpm_map_ctypes, shape, fitsfile, ra, dec, dim, res, multiply = args
+    hpm_map = np.ctypeslib.as_array(hpm_map_ctypes)
+    hpm_map.shape = shape
+
     print 'extracting' + fitsfile
 
     # Create a new WCS object. The number of axes must be set from the start
@@ -78,18 +83,26 @@ def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
     """
     start_time = time.time()
     hpm_map = hp.read_map(hpmfile)
+    size = hpm_map.size
+    shape = hpm_map.shape
+    hpm_map.shape = size
+    hpm_map_ctypes = sharedctypes.RawArray('d', hpm_map)
+    hpm_map = np.frombuffer(hpm_map_ctypes, dtype=np.float64, count=size)
+    hpm_map.shape = shape
     print 'Finish reading file at {:.6f} seconds'.format(time.time() - start_time)
     if (isinstance(fitsfile, (np.ndarray, list, tuple)) and
        isinstance(ra, (np.ndarray, list, tuple)) and
        isinstance(dec, (np.ndarray, list, tuple)) and
        isinstance(multiplier, (np.ndarray, list, tuple))):
-        args = [(hpm_map, f, r, d, dim, res, m)
+        args = [(hpm_map_ctypes, shape, f, r, d, dim, res, m)
                 for f, r, d, m in zip(fitsfile, ra, dec, multiplier)]
     else:
-        args = [(hpm_map, fitsfile, ra, dec, dim, res, multiplier)]
-    tpool = ThreadPool(nthreads)
+        args = [(hpm_map_ctypes, shape, fitsfile, ra, dec, dim, res, multiplier)]
+    # tpool = ThreadPool(nthreads)
+    p = pool(nthreads)
     print 'Start passing arguments to workers at {:.6f} seconds'.format(time.time() - start_time)
-    tpool.map(hpm2sin_base, args)
+    # tpool.map(hpm2sin_base, args)
+    p.map(hpm2sin_base, args)
 
 
 if __name__ == '__main__':
