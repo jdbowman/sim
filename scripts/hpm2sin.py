@@ -115,8 +115,10 @@ def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
                 for f, r, d, m in zip(fitsfile, ra, dec, multiplier)]
     else:
         args = [(fitsfile, ra, dec, dim, res, multiplier, hdr)]
-    workers = Pool(nthreads)
-    workers.map(_hpm2sin_base, args)
+    pool = Pool(nthreads)
+    pool.map(_hpm2sin_base, args)
+    pool.close()
+    pool.join()
 
 
 # Command-line paarsing
