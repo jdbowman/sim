@@ -1,6 +1,7 @@
 """
-Extract a HEALPix image to half-sky SIN (orthographic) projected FITS images.
-The HEALPix image is assumed to be in eliptical coordinate system.
+Generate a SIN (orthographic) projected FITS images from a HEALPix image.
+The HEALPix image is assumed to be in eliptical coordinate system. No
+coordinate rotation is implemented at the moment.
 
 """
 import argparse
@@ -9,16 +10,24 @@ import healpy as hp
 from astropy import wcs
 from astropy.io import fits
 from multiprocessing import Pool
-import time
 
-class hpm:
+
+class _hpm:
+    """
+    A global object to shared an input HEALPix map among processes to reduce
+    the memory comsumption.
+
+    """
     map=None
 
 
-def hpm2sin_base(args):
-    print 'Start subprocess'
-    start_time = time.time()
-    fitsfile, ra, dec, dim, res, multiply = args
+def _hpm2sin_base(args):
+    """
+    Base calculation for hpm2sin. Implemented to be called with
+    multiprocessing.Pool.map
+
+    """
+    fitsfile, ra, dec, dim, res, multiplier, hdr = args
     print 'extracting' + fitsfile
 
     # Create a new WCS object. The number of axes must be set from the start
@@ -44,23 +53,22 @@ def hpm2sin_base(args):
 
     # Get the pixel value from the HEALPix image
     proj_map = np.zeros((dim, dim))
-    proj_map[valid_pix] = multiply * hp.get_interp_val(hpm.map, dec[valid_pix], ra[valid_pix])
+    proj_map[valid_pix] = multiplier * hp.get_interp_val(_hpm.map, dec[valid_pix], ra[valid_pix])
 
     # header is an astropy.io.fits.Header object.  We can use it to create a new
     # PrimaryHDU and write it to a file. data is the image array. Axes in 2D numpy
     # array are ordre slow then fast, opposite to fits ordering, so we have to
     # transpose our image array
     hdu = fits.PrimaryHDU(data=proj_map.T, header=header)
-    print 'Subprocess finish calculation at {:.6f} seconds'.format(time.time() - start_time)
     hdu.writeto(fitsfile, clobber=True)
-    print 'Finish writing fits file at {:.6f} seconds'.format(time.time() - start_time)
 
 
 def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
-            multiplier=1, nthreads=1):
+            multiplier=1, nthreads=1, hdr=None):
     """
-    Extract a HEALPix image to half-sky SIN (orthographic) projected FITS images.
-    The HEALPix image is assumed to be in eliptical coordinate system.
+    Generate a SIN (orthographic) projected FITS images from a HEALPix image.
+    The HEALPix image is assumed to be in eliptical coordinate system. No
+    coordinate rotation is implemented at the moment.
 
     Parameters
     ----------
@@ -78,11 +86,23 @@ def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
         angular size of the center pixel in the fits image in deg
     multiplier: float or array-like, optional
         pairs of two numbers, multiplicative and additive, to apply to the fits image
+    nthreads: integer, optional
+        number of processes to be spawned
+    hrd: dictionary, optional
+        header dictionary to be added or modify to the output fits image.
+        format: {'fits keyword' : (value, comment), ...}
+
+    Note
+    ----
+    This program can project a single HEALPix image to multiple SIN projected
+    FITS images if fitsfile, ra, dec and multiplier arguments are given as
+    array-like objects. nthreads keyword can be used to parallelize multile
+    projection. The default combination of dim and res give a half-sky SIN
+    image with ~0.9" resolution, suitable as inputs for MWA simulation in MAPS.
 
     """
-    start_time = time.time()
-    hpm.map = hp.read_map(hpmfile)
-    print 'Finish reading file at {:.6f} seconds'.format(time.time() - start_time)
+    print "Reading {:s} to a shared memory block"
+    _hpm.map = hp.read_map(hpmfile)
     if (isinstance(fitsfile, (np.ndarray, list, tuple)) and
        isinstance(ra, (np.ndarray, list, tuple)) and
        isinstance(dec, (np.ndarray, list, tuple)) and
@@ -92,10 +112,10 @@ def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
     else:
         args = [(fitsfile, ra, dec, dim, res, multiplier)]
     workers = Pool(nthreads)
-    print 'Start passing arguments to workers at {:.6f} seconds'.format(time.time() - start_time)
-    workers.map(hpm2sin_base, args)
+    workers.map(_hpm2sin_base, args)
 
 
+# Command-line paarsing
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('hpmfile', type=str,
