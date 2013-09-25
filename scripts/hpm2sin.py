@@ -105,7 +105,7 @@ def hpm2sin(hpmfile, fitsfile, ra, dec, dim=7480, res=0.015322941176470588,
     image with ~0.9" resolution, suitable as inputs for MWA simulation in MAPS.
 
     """
-    print "Reading {:s} to a shared memory block"
+    print "Reading {:s} to a shared memory block".format(hpmfile)
     _hpm.map = hp.read_map(hpmfile)
     if (isinstance(fitsfile, (np.ndarray, list, tuple)) and
        isinstance(ra, (np.ndarray, list, tuple)) and
