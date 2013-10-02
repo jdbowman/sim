@@ -66,7 +66,7 @@ def grid_sim(simfile, fitsfile, freq, nside=4096, simfile_type='npy',
     f21 = 1420.40575177  # MHz
     z = f21 / freq - 1
     integrand = lambda z: 1 / np.sqrt(omega_m * (1 + z) ** 3 + omega_l)
-    dc = (c / H_0) * quad(integrand, 0, z)
+    dc = (c / H_0) * quad(integrand, 0, z) / 1000
 
     # Get the vector coordinates (x, y, z) of the HEALPIX pixels
     npix = hp.nside2npix(nside)
