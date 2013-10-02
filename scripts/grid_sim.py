@@ -13,6 +13,7 @@ Tested on:
 import argparse
 import numpy as np
 import healpy as hp
+from scipy.integrate import quad
 
 def grid_sim(simfile, fitsfile, freq, nside=4096, simfile_type='npy',
              temp_field='temp', sep=',', col=3, sim_size=(128, 128, 128),
@@ -58,15 +59,14 @@ def grid_sim(simfile, fitsfile, freq, nside=4096, simfile_type='npy',
 
     # Determine the radial comoving distance r to the center of the shell
     # representing the frequency channel of interest
-    h = 0.7
-    H_0 = 100  # km / s / Mpc
+    H_0 = 70  # km / s / Mpc
     omega_m = 0.3
+    omega_l = 1 - omega_m
     c = 299792458  # m / s
     f21 = 1420.40575177  # MHz
-    dc5 = 7703104.471063611  # kpc
     z = f21 / freq - 1
-    dc = (dc5 - ((2 * c) / (h * H_0))
-          * (1 / np.sqrt(omega_m * (1 + z)) - 1 / np.sqrt(6))) / 1000
+    integrand = lambda z: 1 / np.sqrt(omega_m * (1 + z) ** 3 + omega_l)
+    dc = (c / H_0) * quad(integrand, 0, z)
 
     # Get the vector coordinates (x, y, z) of the HEALPIX pixels
     npix = hp.nside2npix(nside)
