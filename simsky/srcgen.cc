@@ -77,16 +77,16 @@ int main (int argc, const char **argv)
   double freqmax = 200; // MHz
 
   // Require input data
-  string strFluxCDF("/home/piyanat/local/src/simsky/data/src_flux_cdf.dat");
-  string strIndexCDF("/home/piyanat/local/src/simsky/data/src_index_cdf.dat");
-  string strAngCorFile("/home/piyanat/local/src/simsky/data/src_angcor.dat");
+  string strFluxCDF("/usr/global/sim/simsky/data/src_flux_cdf.dat");
+  string strIndexCDF("/usr/global/sim/simsky/data/src_index_cdf.dat");
+  string strAngCorFile("/usr/global/sim/simsky/data/src_angcor.dat");
 
   // Output files
   string strCatalogFile(prefix+"_catalog.dat");
   string strConfusionBase(prefix+"_confusion_map_");
   string outfile_map(prefix+"_map.fits");
   string outfile_pow(prefix+"_pow.fits");
-  string basemap(prefix+"_basmap.fits");
+  string basemap(prefix+"_basemap.fits");
   
   printf("-------------------------------\n");
   printf("            SRCGEN\n");
@@ -139,14 +139,14 @@ int main (int argc, const char **argv)
   alm2map(almT, map);
 */
 
-	// Clean up the GSL random number generator
-	gsl_rng_free(rng);
+  // Clean up the GSL random number generator
+  gsl_rng_free(rng);
 
   // Print out some sanity check that the map was populated
   printf("map[100]: %g\n", map[100]);
   out.create(basemap);
   write_Healpix_map_to_fits(out, map, FITSUTIL<double>::DTYPE);
-	out.close();
+  out.close();
 
   // print out some statistics about our final source count map
   double pmin=0, pmax=0;
@@ -156,7 +156,16 @@ int main (int argc, const char **argv)
   printf("--Min/max pixel: %g/%g\n", pmin, pmax);
   printf("--RMS: %g\n", map.rms());
 
-	// -------------------------------------------------------------------
+
+/* ===========================================================================
+ * Sep 11, 2013 - Piyanat Kittiwisit
+ *  - Comment out the souce clustering section because adding source clustering
+ * cause a recuring pattern on the sourcce map. Source clustering has almost
+ * no effect on bright point source and little effect on dim source. To save
+ * some time, we will ignore it at this point   
+
+
+        // -------------------------------------------------------------------
 	//
 	//	Modify this intial map to add clustering
 	//
@@ -232,49 +241,50 @@ int main (int argc, const char **argv)
   printf("--Average pixel: %g\n", map.average());
   printf("--Min/max pixel: %g/%g\n", pmin, pmax);
   printf("--RMS: %g\n", map.rms());
-  
+*/
 
   // Undo the density normalization to get back to the number of
   // sources per pixel (and round to nearest integer)
-	for (j=0; j<map.Npix(); j++)
-	{
-		map[j] = floor((map[j]+1.0)*pixmean + 0.5);
-    if (map[j] < 0)
-      map[j] = 0;
-	}
+  for (j=0; j<map.Npix(); j++)
+  {
+    map[j] = floor((map[j]+1.0)*pixmean + 0.5);
+    if (map[j] < 0) {map[j] = 0;}
+  }
+  
 
-	// Save the map
+  // Save the map
   out.create(outfile_map.c_str());
   write_Healpix_map_to_fits(out, map, FITSUTIL<double>::DTYPE);
-	out.close();
+  out.close();
 
-	// Save the final power spectrum
-	out.create(outfile_pow.c_str());
-	write_powspec_to_fits(out, pow_final, 1);
-	out.close();
+  /*
+  // Save the final power spectrum
+  out.create(outfile_pow.c_str());
+  write_powspec_to_fits(out, pow_final, 1);
+  out.close();
+  */
 
 	// -------------------------------------------------------------------
 	//
 	//	Run through each pixel and randomly populate with sources drawn
-  //  from the appropriate flux distribution
+        //  from the appropriate flux distribution
 	//
 	// -------------------------------------------------------------------
+
+  printf("start drawing sources\n");
   SourceCatalog catalog;
   SourceConfusionMap confusion(freqmin, freqmax, center_freq, nside, nspec);
   SourceModel model(seed);
   model.LoadCDFs(strFluxCDF, strIndexCDF);
   double flux = 0;
   double index = 0;
-  
-  printf("\nPopulating with sources...\n\n");
 
+  printf("Populating with sources...\n");
   // Loop over all map pixels
-  for (j=0; j<map.Npix(); j++)
-  {
+  for (j=0; j<map.Npix(); j++) {
     if (j%10000 == 0)
       printf("\rCurrently on pixel: %d of %d   ", j, map.Npix());
       cout << flush;
-
     pointing ang = map.pix2ang(j);
 
     // Loop over all sources in pixel
