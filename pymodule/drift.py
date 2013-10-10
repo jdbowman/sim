@@ -247,3 +247,5 @@ def __call_go(instance):
 def batch_drift(instance, nthreads=4):
     pool = multiprocessing.Pool(nthreads)
     pool.map(__call_go, instance)
+    pool.close()
+    pool.join()

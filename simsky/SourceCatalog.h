@@ -107,12 +107,12 @@ class SourceCatalog
       // DEC [deg -90->90], RA [deg 0->360], flux, spectral index
 
       FILE* fid=NULL;
-printf("HELLO!!\n");
+
 printf("%s\n", strFilename.c_str());
       fid = fopen(strFilename.c_str(), "w");
       if (fid != NULL)
       {
-	printf("here!\n");
+
         for (uint n=0; n<m_index.size(); n++)
         {
           fprintf(fid, "%g, %g, %g, %g\n", 90.0 - 180.0 / 3.141592653 * m_theta[n], fmod(180.0 / 3.141592653 * m_phi[n] + 360.0, 360.0), m_flux[n], m_index[n]);

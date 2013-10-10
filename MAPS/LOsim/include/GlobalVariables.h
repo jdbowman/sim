@@ -1,1 +1,0 @@
-int GlobalVariables(char *mainArg);

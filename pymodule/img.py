@@ -2,8 +2,16 @@ import numpy as np
 import healpy as hp
 import pyfits as pf
 import shutil
+import logging
+import sys
+import multiprocessing
 from subprocess import call
-from multiprocessing import Pool
+
+logging.basicConfig(
+    stream=sys.stderr,
+    format='%(asctime)s - %(processName)s:%(process)d - %(levelname)s - '
+           '%(module)s.%(funcName)s - %(message)s',
+    level=logging.DEBUG)
 
 
 class Error(Exception):
@@ -102,7 +110,7 @@ def extrapolate_hpm(hpm_in_name, hpm_out_name, nside_out, fitrange,
 
 
 def freq_interp_fits(infits, infreq, outfreqs, outfits=None, beta=None,
-                     gamma=None, T2Jy=True, nthreads=1):
+                     gamma=None, T2Jy=True):
     """
     Interpolate a FITS image to other frequencies usig a spectral index map
     (beta) and a spectral index curverture map (gamma)
@@ -126,34 +134,33 @@ def freq_interp_fits(infits, infreq, outfreqs, outfits=None, beta=None,
      """
     inmap, inmap_header = pf.getdata(infits, header=True)
     basefreq = infreq
-    print 'Read base map from {0:s}'.format(infits)
-    print 'Frequency of inmap: {0:f} MHz'.format(infreq)
+    # print 'Read base map from {0:s}'.format(infits)
+    # print 'Frequency of inmap: {0:f} MHz'.format(infreq)
     if isinstance(outfreqs, float):
         freqs = [outfreqs]
     elif isinstance(outfreqs, (tuple, list, np.ndarray)):
         freqs = outfreqs
     else:
         raise Exception("Check outfreqs format")
-    print 'Output frequencie(s):'
-    print freqs
+    logging.info('Output frequencie(s): %s', (freqs))
     if isinstance(beta, (int, float)):
         beta = np.ones(inmap.shape) * beta
     elif isinstance(beta, str):
-        print 'read beta map from {0:s}'.format(beta)
+        logging.info('read beta map from %s', beta)
         beta = pf.getdata(beta)
     elif beta is None:
         beta = np.ones(inmap.shape) * -2.5
-        print 'beta is asuume to be -2.5'
+        logging.info('beta is asuume to be -2.5')
     else:
         raise Exception('beta must be a number, a fits image or None for -2.5')
     if isinstance(gamma, (int, float)):
         gamma = np.ones(inmap.shape) * gamma
     elif isinstance(gamma, str):
-        print 'read gamma map from {0:s}'.format(gamma)
+        logging.info('read gamma map from %s', gamma)
         gamma = pf.getdata(gamma)
     elif gamma is None:
         gamma = np.zeros(inmap.shape)
-        print 'gamma is asuume to be 0'
+        logging.info('gamma is asuume to be 0')
     else:
         raise Exception('gamma must be a number, a fits image or None for 0')
     if outfits is None:
@@ -172,17 +179,10 @@ def freq_interp_fits(infits, infreq, outfreqs, outfits=None, beta=None,
         inmap_header['BUNIT'] = 'Jy/sr'
     else:
         multiplier = np.ones_like(freqs)
-
-    def interp(args):
-        f, m, name = args
-        print 'Scaling base map to {0:.3f}MHz and save output to {1:s}'\
-            .format(f, name)
+    for f, m, name in zip(freqs, multiplier, outfits):
+        logging.info('Scaling base map to %.3f MHz and save output to %s', f, name)
         T = m * inmap * np.exp(beta * np.log(f / basefreq) + gamma * (np.log(f / basefreq)) ** 2)
         pf.writeto(name, T, header=inmap_header, clobber=True)
-
-    args = (freqs, multiplier, outfits)
-    p = Pool(nthreads)
-    p.map(interp, args)
 
 
 def freq_interp_hpm(inmap, infreq, outfreq, spectral_index=(), curverture=()):
@@ -272,7 +272,7 @@ def extract_hpm(infile, outfile, ra, dec, size=(114.6156, 114.6156),
     if not len(ra) == len(dec) == len(outfile):
         raise InputError("length of outfile, ra and dec are not equal")
     args = [[infile, o, r, d, size, res, isys] for o, r, d in zip(outfile, ra, dec)]
-    p = Pool(nthreads)
+    p = multiprocessing.Pool(nthreads)
     p.map(hpm_extract_facet, args)
 
 

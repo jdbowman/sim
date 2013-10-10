@@ -92,29 +92,33 @@ class SourceConfusionMap
 		// We only have to build the X matrix once
 		for (j=0; j<=m_nspec; j++)
 		{
-			for (k=0; k<=m_nspec; k++)
-			{
-        gsl_matrix_set(X, j, k, pow(log10(m_freqs[j]/m_center), k));
-			}
+		    for (k=0; k<=m_nspec; k++)
+		    {
+                        gsl_matrix_set(X, j, k, pow(log10(m_freqs[j]/m_center), k));
+		    }
 		}
 
 		// Loop over pixels
 		for (j=0; j < (uint) m_maps[0].Npix(); j++)
 		{
-			// Populate the y vector for this pixel
-			for (k=0; k<m_freqs.size(); k++)
-			{
-				gsl_vector_set(y, k, log10(m_maps[k][j]));
-			}
+		  // No need to do the fitting if there is no source in the pixel
+                  // nor replacing the value of the maps
+                  if (m_maps[0][j] != 0) {
+		    // Populate the y vector for this pixel
+		    for (k=0; k<m_freqs.size(); k++)
+		    {
+		        gsl_vector_set(y, k, log10(m_maps[k][j]));
+		    }
 
-			// Do the fit now
-			gsl_multifit_linear(X, y, c, cov, &chisq, m_work);
+		    // Do the fit now
+		    gsl_multifit_linear(X, y, c, cov, &chisq, m_work);
 
-			// Replace the map values with these new coefficients
-			for (k=0; k<m_freqs.size(); k++)
-			{
-				m_maps[k][j] = gsl_vector_get(c,k);
-			}
+		    // Replace the map values with these new coefficients
+		    for (k=0; k<m_freqs.size(); k++)
+		    {
+                        m_maps[k][j] = gsl_vector_get(c,k);
+		    }
+		  }  
 		}
 
     gsl_matrix_free(X);
@@ -122,8 +126,7 @@ class SourceConfusionMap
     gsl_vector_free(y);
     gsl_vector_free(c);
 
-	}
-
+  }
 
 
 	void WriteToFiles(const string& strBase)
