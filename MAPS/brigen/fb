@@ -1,4 +1,0 @@
-#!/bin/bash
-flex read_prj.l
-bison -d read_prj.y
-gcc lex.yy.c read_prj.tab.c -o read_prj

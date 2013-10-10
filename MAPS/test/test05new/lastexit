@@ -1,4 +1,0 @@
-options=nobase
-axis=uvdist,amp
-vis=test05.uv
-device='/xs'
